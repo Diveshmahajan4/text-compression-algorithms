@@ -339,7 +339,7 @@ function compressRLE(data) {
     "Compression complete and file sent for download. " +
     "\n" +
     "Compression Ratio : " +
-    (data.length / final_string.length).toPrecision(6);
+    (data.length / compressedData.length).toPrecision(6);
 
   return [compressedData, output_message];
 }
@@ -356,7 +356,8 @@ function decodeRLE(encodedText) {
       count = "";
     }
   }
-  return decoded;
+  let output_message = "Decompression complete and file sent for download.";
+  return [decoded, output_message];
 }
 
 /// onload function
@@ -496,31 +497,60 @@ window.onload = function () {
 
   // called when decompress button is clicked
   decodeBtn.onclick = function () {
-    console.log("decode onclick");
-    var uploadedFile = uploadFile.files[0];
-    if (uploadedFile === undefined) {
-      alert("No file uploaded.\nPlease upload a file and try again!");
-      return;
+    const encodingType = document.getElementById("selectedItem").innerText;
+    if (encodingType === "Run-length encoding (RLE)") {
+      console.log("decode onclick RLE");
+      var uploadedFile = uploadFile.files[0];
+      if (uploadedFile === undefined) {
+        alert("No file uploaded.\nPlease upload a file and try again!");
+        return;
+      }
+      if (isSubmitted === false) {
+        alert(
+          "File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!"
+        );
+        return;
+      }
+      onclickChanges("Done!! Your file will be De-compressed", step2);
+      onclickChanges2("De-compressing your file ...", "De-compressed");
+      var fileReader = new FileReader();
+      fileReader.onload = function (fileLoadedEvent) {
+        let text = fileLoadedEvent.target.result;
+        let [decodedString, outputMsg] = decodeRLE(text);
+        myDownloadFile(
+          uploadedFile.name.split(".")[0] + "_decompressed.txt",
+          decodedString
+        );
+        ondownloadChanges(outputMsg);
+      };
+      fileReader.readAsText(uploadedFile, "UTF-8");
+    } else {
+      console.log("decode onclick LZW");
+      var uploadedFile = uploadFile.files[0];
+      if (uploadedFile === undefined) {
+        alert("No file uploaded.\nPlease upload a file and try again!");
+        return;
+      }
+      if (isSubmitted === false) {
+        alert(
+          "File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!"
+        );
+        return;
+      }
+      onclickChanges("Done!! Your file will be De-compressed", step2);
+      onclickChanges2("De-compressing your file ...", "De-compressed");
+      var fileReader = new FileReader();
+      fileReader.onload = function (fileLoadedEvent) {
+        let text = fileLoadedEvent.target.result;
+        let [decodedString, outputMsg] = codecObj.decode(text);
+        myDownloadFile(
+          uploadedFile.name.split(".")[0] + "_decompressed.txt",
+          decodedString
+        );
+        ondownloadChanges(outputMsg);
+      };
+      fileReader.readAsText(uploadedFile, "UTF-8");
     }
-    if (isSubmitted === false) {
-      alert(
-        "File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!"
-      );
-      return;
-    }
-    onclickChanges("Done!! Your file will be De-compressed", step2);
-    onclickChanges2("De-compressing your file ...", "De-compressed");
-    var fileReader = new FileReader();
-    fileReader.onload = function (fileLoadedEvent) {
-      let text = fileLoadedEvent.target.result;
-      let [decodedString, outputMsg] = codecObj.decode(text);
-      myDownloadFile(
-        uploadedFile.name.split(".")[0] + "_decompressed.txt",
-        decodedString
-      );
-      ondownloadChanges(outputMsg);
-    };
-    fileReader.readAsText(uploadedFile, "UTF-8");
   };
 };
 
