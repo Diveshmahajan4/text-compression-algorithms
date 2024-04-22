@@ -360,6 +360,61 @@ function decodeRLE(encodedText) {
   return [decoded, output_message];
 }
 
+function lzw_encode(s) {
+  var dict = {};
+  var data = (s + "").split("");
+  var out = [];
+  var currChar;
+  var phrase = data[0];
+  var code = 256;
+  for (var i = 1; i < data.length; i++) {
+    currChar = data[i];
+    if (dict[phrase + currChar] != null) {
+      phrase += currChar;
+    } else {
+      out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+      dict[phrase + currChar] = code;
+      code++;
+      phrase = currChar;
+    }
+  }
+  out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+  for (var i = 0; i < out.length; i++) {
+    out[i] = String.fromCharCode(out[i]);
+  }
+  let output_message =
+    "Compression complete and file sent for download. " +
+    "\n" +
+    "Compression Ratio : " +
+    (data.length / out.join("").length).toPrecision(6);
+
+  return [out.join(""), output_message];
+}
+function lzw_decode(s) {
+  var dict = {};
+  var data = (s + "").split("");
+  var currChar = data[0];
+  var oldPhrase = currChar;
+  var out = [currChar];
+  var code = 256;
+  var phrase;
+  for (var i = 1; i < data.length; i++) {
+    var currCode = data[i].charCodeAt(0);
+    if (currCode < 256) {
+      phrase = data[i];
+    } else {
+      phrase = dict[currCode] ? dict[currCode] : oldPhrase + currChar;
+    }
+    out.push(phrase);
+    currChar = phrase.charAt(0);
+    dict[code] = oldPhrase + currChar;
+    code++;
+    oldPhrase = phrase;
+  }
+  let output_message = "Decompression complete and file sent for download.";
+  return [out.join(""), output_message];
+}
+
 /// onload function
 window.onload = function () {
   console.log("here onload");
@@ -448,8 +503,52 @@ window.onload = function () {
         ondownloadChanges(outputMsg);
       };
       fileReader.readAsText(uploadedFile, "UTF-8");
+    } else if (encodingType === "Lempel-Ziv-Welch (LZW) algorithm") {
+      console.log("encode onclick LGBT");
+      var uploadedFile = uploadFile.files[0];
+      if (uploadedFile === undefined) {
+        alert("No file uploaded.\nPlease upload a file and try again!");
+        return;
+      }
+      if (isSubmitted === false) {
+        alert(
+          "File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!"
+        );
+        return;
+      }
+      console.log(uploadedFile.size);
+      if (uploadedFile.size === 0) {
+        alert(
+          "WARNING: You have uploaded an empty file!\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
+        );
+      } else if (uploadedFile.size <= 350) {
+        alert(
+          "WARNING: The uploaded file is very small in size (" +
+            uploadedFile.size +
+            " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
+        );
+      } else if (uploadedFile.size < 1000) {
+        alert(
+          "WARNING: The uploaded file is small in size (" +
+            uploadedFile.size +
+            " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
+        );
+      }
+      onclickChanges("Done!! Your file will be Compressed", step2);
+      onclickChanges2("Compressing your file ...", "Compressed");
+      var fileReader = new FileReader();
+      fileReader.onload = function (fileLoadedEvent) {
+        let text = fileLoadedEvent.target.result;
+        let [encodedString, outputMsg] = lzw_encode(text);
+        myDownloadFile(
+          uploadedFile.name.split(".")[0] + "_compressed.txt",
+          encodedString
+        );
+        ondownloadChanges(outputMsg);
+      };
+      fileReader.readAsText(uploadedFile, "UTF-8");
     } else {
-      console.log("encode onclick LZW");
+      console.log("encode onclick Huffman");
       var uploadedFile = uploadFile.files[0];
       if (uploadedFile === undefined) {
         alert("No file uploaded.\nPlease upload a file and try again!");
@@ -524,8 +623,34 @@ window.onload = function () {
         ondownloadChanges(outputMsg);
       };
       fileReader.readAsText(uploadedFile, "UTF-8");
+    } else if (encodingType === "Lempel-Ziv-Welch (LZW) algorithm") {
+      console.log("decode onclick RLE");
+      var uploadedFile = uploadFile.files[0];
+      if (uploadedFile === undefined) {
+        alert("No file uploaded.\nPlease upload a file and try again!");
+        return;
+      }
+      if (isSubmitted === false) {
+        alert(
+          "File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!"
+        );
+        return;
+      }
+      onclickChanges("Done!! Your file will be De-compressed", step2);
+      onclickChanges2("De-compressing your file ...", "De-compressed");
+      var fileReader = new FileReader();
+      fileReader.onload = function (fileLoadedEvent) {
+        let text = fileLoadedEvent.target.result;
+        let [decodedString, outputMsg] = lzw_decode(text);
+        myDownloadFile(
+          uploadedFile.name.split(".")[0] + "_decompressed.txt",
+          decodedString
+        );
+        ondownloadChanges(outputMsg);
+      };
+      fileReader.readAsText(uploadedFile, "UTF-8");
     } else {
-      console.log("decode onclick LZW");
+      console.log("decode onclick huffman");
       var uploadedFile = uploadFile.files[0];
       if (uploadedFile === undefined) {
         alert("No file uploaded.\nPlease upload a file and try again!");
