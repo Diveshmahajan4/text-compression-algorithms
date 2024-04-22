@@ -158,7 +158,9 @@ class Codec {
         "\n" +
         "Compression Ratio : " +
         (data.length / final_string.length).toPrecision(6);
-      return [final_string, output_message];
+      let ratio = (data.length / final_string.length).toPrecision(6);
+      let size = compressedData.length * 1;
+      return [final_string, output_message, ratio, size];
     }
 
     if (mp.size === 1) {
@@ -340,8 +342,9 @@ function compressRLE(data) {
     "\n" +
     "Compression Ratio : " +
     (data.length / compressedData.length).toPrecision(6);
-
-  return [compressedData, output_message];
+  let ratio = (data.length / compressedData.length).toPrecision(6);
+  let size = compressedData.length * 1;
+  return [compressedData, output_message, ratio, size];
 }
 
 function decodeRLE(encodedText) {
@@ -387,8 +390,9 @@ function lzw_encode(s) {
     "\n" +
     "Compression Ratio : " +
     (data.length / out.join("").length).toPrecision(6);
-
-  return [out.join(""), output_message];
+  let ratio = (data.length / out.join("").length).toPrecision(6);
+  let size = out.join("").length * 1;
+  return [out.join(""), output_message, ratio, size];
 }
 function lzw_decode(s) {
   var dict = {};
@@ -422,6 +426,7 @@ window.onload = function () {
   /// accesing dom elements
   decodeBtn = document.getElementById("decode");
   encodeBtn = document.getElementById("encode");
+  resultBtn = document.getElementById("result");
   fileForm = document.getElementById("fileform");
   uploadFile = document.getElementById("uploadfile");
   submitBtn = document.getElementById("submitbtn");
@@ -456,6 +461,77 @@ window.onload = function () {
     onclickChanges("Done!! File uploaded !", step1);
   };
 
+  resultBtn.onclick = function () {
+    console.log("result onclick");
+    var uploadedFile = uploadFile.files[0];
+    if (uploadedFile === undefined) {
+      alert("No file uploaded.\nPlease upload a file and try again!");
+      return;
+    }
+    if (isSubmitted === false) {
+      alert(
+        "File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!"
+      );
+      return;
+    }
+    console.log(uploadedFile.size);
+    if (uploadedFile.size === 0) {
+      alert(
+        "WARNING: You have uploaded an empty file!\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
+      );
+    } else if (uploadedFile.size <= 350) {
+      alert(
+        "WARNING: The uploaded file is very small in size (" +
+          uploadedFile.size +
+          " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
+      );
+    } else if (uploadedFile.size < 1000) {
+      alert(
+        "WARNING: The uploaded file is small in size (" +
+          uploadedFile.size +
+          " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
+      );
+    }
+    onclickChanges("Done!! Your file will be Compressed", step2);
+    onclickChanges2("Compressing your file ...", "Compressed");
+    var fileReader = new FileReader();
+
+    fileReader.onload = function (fileLoadedEvent) {
+      let text = fileLoadedEvent.target.result;
+      let resultsTableBody = document.getElementById("resultsTableBody");
+
+      // LZW Compression
+      let [string1, LZWoutputMsg, ratioLZW, sizeLZW] = lzw_encode(text);
+      insertTableRow(resultsTableBody, "LZW", ratioLZW, sizeLZW);
+      console.log(ratioLZW);
+      // RLE Compression
+      let [string2, RLEoutputMsg, ratioRLE, sizeRLE] = compressRLE(text);
+      insertTableRow(resultsTableBody, "RLE", ratioRLE, sizeRLE);
+      console.log(ratioRLE);
+      // Huffman Compression
+      let [string3, HuffmanoutputMsg, ratioHuffman, sizeHuffman] =
+        codecObj.encode(text);
+      insertTableRow(resultsTableBody, "Huffman", ratioHuffman, sizeHuffman);
+      console.log(ratioHuffman);
+    };
+
+    function insertTableRow(
+      tableBody,
+      algorithmUsed,
+      compressionRatio,
+      sizeAfterCompression
+    ) {
+      let newRow = tableBody.insertRow();
+      let algorithmCell = newRow.insertCell(0);
+      let ratioCell = newRow.insertCell(1);
+      let sizeCell = newRow.insertCell(2);
+
+      algorithmCell.innerText = algorithmUsed;
+      ratioCell.innerText = compressionRatio;
+      sizeCell.innerText = sizeAfterCompression;
+    }
+    fileReader.readAsText(uploadedFile, "UTF-8");
+  };
   /// called when compress button is clicked
   encodeBtn.onclick = function () {
     const encodingType = document.getElementById("selectedItem").innerText;
