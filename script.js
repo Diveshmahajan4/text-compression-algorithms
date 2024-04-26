@@ -220,12 +220,15 @@ class Codec {
       "#" +
       tree_string +
       encoded_data;
-    let output_message =
+      let output_message =
       "Compression complete and file sent for download. " +
       "\n" +
       "Compression Ratio : " +
       (data.length / final_string.length).toPrecision(6);
-    return [final_string, output_message];
+      console.log(data.length);
+       console.log(output_message);
+    return [final_string, (data.length / final_string.length).toPrecision(6)];
+
   }
 
   /// decoder function
@@ -509,9 +512,10 @@ window.onload = function () {
       insertTableRow(resultsTableBody, "RLE", ratioRLE, sizeRLE);
       console.log(ratioRLE);
       // Huffman Compression
-      let [string3, HuffmanoutputMsg, ratioHuffman, sizeHuffman] =
+      let [sizeHuffman,ratioHuffman] =
+
         codecObj.encode(text);
-      insertTableRow(resultsTableBody, "Huffman", ratioHuffman, sizeHuffman);
+      insertTableRow(resultsTableBody, "Huffman", ratioHuffman, sizeHuffman.length);
       console.log(ratioHuffman);
     };
 
