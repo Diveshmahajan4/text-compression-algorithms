@@ -203,7 +203,7 @@ class Codec {
       binary_string += "0";
     }
     let encoded_data = "";
-    for (let i = 0; i < binary_string.length; ) {
+    for (let i = 0; i < binary_string.length;) {
       let curr_num = 0;
       for (let j = 0; j < 8; j++, i++) {
         curr_num *= 2;
@@ -220,13 +220,13 @@ class Codec {
       "#" +
       tree_string +
       encoded_data;
-      let output_message =
+    let output_message =
       "Compression complete and file sent for download. " +
       "\n" +
       "Compression Ratio : " +
       (data.length / final_string.length).toPrecision(6);
-      console.log(data.length);
-       console.log(output_message);
+    console.log(data.length);
+    console.log(output_message);
     return [final_string, (data.length / final_string.length).toPrecision(6)];
 
   }
@@ -454,8 +454,8 @@ window.onload = function () {
     if (extension != "txt") {
       alert(
         "Invalid file type (." +
-          extension +
-          ") \nPlease upload a valid .txt file and try again!"
+        extension +
+        ") \nPlease upload a valid .txt file and try again!"
       );
       return;
     }
@@ -472,28 +472,16 @@ window.onload = function () {
       return;
     }
     if (isSubmitted === false) {
-      alert(
-        "File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!"
-      );
+      alert("File not submitted.\nPlease click the submit button on the previous step\nto submit the file and try again!");
       return;
     }
     console.log(uploadedFile.size);
     if (uploadedFile.size === 0) {
-      alert(
-        "WARNING: You have uploaded an empty file!\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
-      );
+      alert("WARNING: You have uploaded an empty file!\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!");
     } else if (uploadedFile.size <= 350) {
-      alert(
-        "WARNING: The uploaded file is very small in size (" +
-          uploadedFile.size +
-          " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
-      );
+      alert("WARNING: The uploaded file is very small in size (" + uploadedFile.size + " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!");
     } else if (uploadedFile.size < 1000) {
-      alert(
-        "WARNING: The uploaded file is small in size (" +
-          uploadedFile.size +
-          " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
-      );
+      alert("WARNING: The uploaded file is small in size (" + uploadedFile.size + " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!");
     }
     onclickChanges("Done!! Your file will be Compressed", step2);
     onclickChanges2("Compressing your file ...", "Compressed");
@@ -502,6 +490,11 @@ window.onload = function () {
     fileReader.onload = function (fileLoadedEvent) {
       let text = fileLoadedEvent.target.result;
       let resultsTableBody = document.getElementById("resultsTableBody");
+
+      // Clear existing rows
+      while (resultsTableBody.firstChild) {
+        resultsTableBody.removeChild(resultsTableBody.firstChild);
+      }
 
       // LZW Compression
       let [string1, LZWoutputMsg, ratioLZW, sizeLZW] = lzw_encode(text);
@@ -512,19 +505,12 @@ window.onload = function () {
       insertTableRow(resultsTableBody, "RLE", ratioRLE, sizeRLE);
       console.log(ratioRLE);
       // Huffman Compression
-      let [sizeHuffman,ratioHuffman] =
-
-        codecObj.encode(text);
+      let [sizeHuffman, ratioHuffman] = codecObj.encode(text);
       insertTableRow(resultsTableBody, "Huffman", ratioHuffman, sizeHuffman.length);
       console.log(ratioHuffman);
     };
 
-    function insertTableRow(
-      tableBody,
-      algorithmUsed,
-      compressionRatio,
-      sizeAfterCompression
-    ) {
+    function insertTableRow(tableBody, algorithmUsed, compressionRatio, sizeAfterCompression) {
       let newRow = tableBody.insertRow();
       let algorithmCell = newRow.insertCell(0);
       let ratioCell = newRow.insertCell(1);
@@ -560,14 +546,14 @@ window.onload = function () {
       } else if (uploadedFile.size <= 350) {
         alert(
           "WARNING: The uploaded file is very small in size (" +
-            uploadedFile.size +
-            " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
+          uploadedFile.size +
+          " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
         );
       } else if (uploadedFile.size < 1000) {
         alert(
           "WARNING: The uploaded file is small in size (" +
-            uploadedFile.size +
-            " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
+          uploadedFile.size +
+          " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
         );
       }
       onclickChanges("Done!! Your file will be Compressed", step2);
@@ -604,14 +590,14 @@ window.onload = function () {
       } else if (uploadedFile.size <= 350) {
         alert(
           "WARNING: The uploaded file is very small in size (" +
-            uploadedFile.size +
-            " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
+          uploadedFile.size +
+          " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
         );
       } else if (uploadedFile.size < 1000) {
         alert(
           "WARNING: The uploaded file is small in size (" +
-            uploadedFile.size +
-            " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
+          uploadedFile.size +
+          " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
         );
       }
       onclickChanges("Done!! Your file will be Compressed", step2);
@@ -648,14 +634,14 @@ window.onload = function () {
       } else if (uploadedFile.size <= 350) {
         alert(
           "WARNING: The uploaded file is very small in size (" +
-            uploadedFile.size +
-            " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
+          uploadedFile.size +
+          " bytes) !\nThe compressed file might be larger in size than the uncompressed file (compression ratio might be smaller than one).\nBetter compression ratios are achieved for larger file sizes!"
         );
       } else if (uploadedFile.size < 1000) {
         alert(
           "WARNING: The uploaded file is small in size (" +
-            uploadedFile.size +
-            " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
+          uploadedFile.size +
+          " bytes) !\nThe compressed file's size might be larger than expected (compression ratio might be small).\nBetter compression ratios are achieved for larger file sizes!"
         );
       }
       onclickChanges("Done!! Your file will be Compressed", step2);
